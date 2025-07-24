@@ -1,70 +1,104 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include <string.h>
 
-#define NUM_CARTAS 5
+#define MAX 2
 
 typedef struct {
+    char estado[30];
+    char codigo[10];
     char nome[30];
-    int forca;
-    int velocidade;
-    int inteligencia;
+    int populacao;
+    float area;
+    float pib;
+    int pontosTuristicos;
+    float densidadePopulacional;
 } Carta;
 
-void imprimirCarta(Carta c) {
-    printf("\nCarta: %s\n", c.nome);
-    printf("1 - Força: %d\n", c.forca);
-    printf("2 - Velocidade: %d\n", c.velocidade);
-    printf("3 - Inteligência: %d\n", c.inteligencia);
+void cadastrarCarta(Carta *carta) {
+    printf("Estado: ");
+    scanf(" %[^\n]", carta->estado);
+    printf("Código da carta: ");
+    scanf(" %[^\n]", carta->codigo);
+    printf("Nome da cidade: ");
+    scanf(" %[^\n]", carta->nome);
+    printf("População: ");
+    scanf("%d", &carta->populacao);
+    printf("Área (km²): ");
+    scanf("%f", &carta->area);
+    printf("PIB (em bilhões): ");
+    scanf("%f", &carta->pib);
+    printf("Número de pontos turísticos: ");
+    scanf("%d", &carta->pontosTuristicos);
+
+    carta->densidadePopulacional = carta->populacao / carta->area;
+}
+
+void exibirCarta(Carta carta) {
+    printf("\n--- Carta da Cidade ---\n");
+    printf("Estado: %s\n", carta.estado);
+    printf("Código: %s\n", carta.codigo);
+    printf("Cidade: %s\n", carta.nome);
+    printf("População: %d\n", carta.populacao);
+    printf("Área: %.2f km²\n", carta.area);
+    printf("PIB: R$ %.2f bilhões\n", carta.pib);
+    printf("Pontos Turísticos: %d\n", carta.pontosTuristicos);
+    printf("Densidade Populacional: %.2f hab/km²\n", carta.densidadePopulacional);
 }
 
 int comparar(Carta c1, Carta c2, int atributo) {
-    switch(atributo) {
-        case 1: return c1.forca - c2.forca;
-        case 2: return c1.velocidade - c2.velocidade;
-        case 3: return c1.inteligencia - c2.inteligencia;
-        default: return 0;
+    switch (atributo) {
+        case 1:
+            return (c1.populacao > c2.populacao) ? 1 : 2;
+        case 2:
+            return (c1.area > c2.area) ? 1 : 2;
+        case 3:
+            return (c1.pib > c2.pib) ? 1 : 2;
+        case 4:
+            return (c1.pontosTuristicos > c2.pontosTuristicos) ? 1 : 2;
+        case 5:
+            return (c1.densidadePopulacional < c2.densidadePopulacional) ? 1 : 2;
+        default:
+            return 0;
     }
 }
 
+void menuComparacao() {
+    printf("\nEscolha o atributo para comparar:\n");
+    printf("1 - População (maior vence)\n");
+    printf("2 - Área (maior vence)\n");
+    printf("3 - PIB (maior vence)\n");
+    printf("4 - Pontos Turísticos (maior vence)\n");
+    printf("5 - Densidade Populacional (menor vence)\n");
+    printf("Opção: ");
+}
+
 int main() {
-    srand(time(NULL));
+    Carta cartas[MAX];
 
-    Carta baralho[NUM_CARTAS] = {
-        {"Dragão", 90, 60, 70},
-        {"Fênix", 80, 75, 85},
-        {"Troll", 95, 40, 30},
-        {"Elfo", 60, 85, 90},
-        {"Mago", 50, 55, 95}
-    };
+    printf("Cadastro da primeira carta:\n");
+    cadastrarCarta(&cartas[0]);
 
-    int idxJogador = rand() % NUM_CARTAS;
-    int idxCPU;
-    do {
-        idxCPU = rand() % NUM_CARTAS;
-    } while (idxCPU == idxJogador); // Garante cartas diferentes
+    printf("\nCadastro da segunda carta:\n");
+    cadastrarCarta(&cartas[1]);
 
-    Carta jogador = baralho[idxJogador];
-    Carta cpu = baralho[idxCPU];
-
-    printf("Sua carta:\n");
-    imprimirCarta(jogador);
+    printf("\nExibindo cartas cadastradas:\n");
+    exibirCarta(cartas[0]);
+    exibirCarta(cartas[1]);
 
     int escolha;
-    printf("\nEscolha um atributo para comparar (1-Força, 2-Velocidade, 3-Inteligência): ");
+    menuComparacao();
     scanf("%d", &escolha);
 
-    printf("\nCarta do oponente:");
-    imprimirCarta(cpu);
+    int resultado = comparar(cartas[0], cartas[1], escolha);
 
-    int resultado = comparar(jogador, cpu, escolha);
-
-    if (resultado > 0)
-        printf("\nVocê venceu!\n");
-    else if (resultado < 0)
-        printf("\nVocê perdeu.\n");
-    else
-        printf("\nEmpate!\n");
+    printf("\nResultado da comparação:\n");
+    if (resultado == 1) {
+        printf("A carta vencedora é: %s\n", cartas[0].nome);
+    } else if (resultado == 2) {
+        printf("A carta vencedora é: %s\n", cartas[1].nome);
+    } else {
+        printf("Opção inválida ou empate.\n");
+    }
 
     return 0;
 }
